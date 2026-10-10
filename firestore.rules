@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // IMPORTANTE: substitua os dois textos pelos UIDs dos dois usuários autorizados.
+    // Não use regras abertas como allow read, write: if true.
+    function isCoupleMember() {
+      return request.auth != null &&
+        request.auth.uid in [
+          "COLE_AQUI_UID_DA_PESSOA_1",
+          "COLE_AQUI_UID_DA_PESSOA_2"
+        ];
+    }
+
+    match /households/financinho-casal/{document=**} {
+      allow read, create, update, delete: if isCoupleMember();
+    }
+  }
+}
