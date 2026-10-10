@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14243a">
+  <title>Financinho — finanças a dois</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="auth-screen" class="auth-wrap">
+    <section class="auth-card">
+      <div class="brand-mark">F<span>+</span></div>
+      <p class="eyebrow">FINANÇAS A DOIS</p>
+      <h1>Financinho</h1>
+      <p class="muted">Organizem o presente. Construam os planos de vocês.</p>
+      <form id="auth-form">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
+        <label for="password">Senha</label>
+        <input id="password" type="password" autocomplete="current-password" minlength="6" placeholder="Mínimo de 6 caracteres" required>
+        <button id="login-btn" class="btn primary full" type="submit">Entrar</button>
+        <button id="signup-btn" class="btn secondary full" type="button">Criar minha conta</button>
+      </form>
+      <p id="auth-message" class="notice" role="status"></p>
+      <p class="tiny muted">Cada pessoa terá seu próprio login. Os dados financeiros ficam no espaço compartilhado do casal.</p>
+    </section>
+  </div>
+
+  <div id="app" class="app-shell hidden">
+    <aside class="sidebar">
+      <a class="brand" href="#" data-page="dashboard"><span class="brand-mark small">F<span>+</span></span><span>Financinho<small>FINANÇAS A DOIS</small></span></a>
+      <nav id="nav">
+        <button class="nav-link active" data-page="dashboard">◫ <span>Visão geral</span></button>
+        <button class="nav-link" data-page="transactions">↕ <span>Entradas e saídas</span></button>
+        <button class="nav-link" data-page="bills">▤ <span>Contas a pagar</span></button>
+        <button class="nav-link" data-page="debts">◎ <span>Dívidas</span></button>
+        <button class="nav-link" data-page="cards">▣ <span>Cartões e parcelas</span></button>
+        <button class="nav-link" data-page="budgets">▥ <span>Orçamento por setor</span></button>
+        <button class="nav-link" data-page="goals">☆ <span>Metas e reservas</span></button>
+        <button class="nav-link" data-page="assets">◇ <span>Patrimônio</span></button>
+        <button class="nav-link" data-page="reports">⌁ <span>Relatórios</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="user-chip"><span class="avatar">♡</span><div><b id="user-email">Conta</b><small>Espaço compartilhado</small></div></div>
+        <button id="logout-btn" class="btn ghost full">Sair da conta</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><p class="eyebrow" id="today-label">FINANÇAS DA FAMÍLIA</p><h2 id="page-title">Visão geral</h2></div>
+        <button class="btn primary" id="quick-add">＋ Novo lançamento</button>
+      </header>
+
+      <section id="dashboard-page" class="page">
+        <div class="welcome-row">
+          <div><h3>O dinheiro de vocês, em um só lugar.</h3><p class="muted">Acompanhem juntos cada passo, sem perder de vista os planos.</p></div>
+          <div class="month-picker"><label for="month-filter">Mês</label><input type="month" id="month-filter"></div>
+        </div>
+        <div class="summary-grid">
+          <article class="metric"><span>Saldo registrado</span><strong id="metric-balance">R$ 0,00</strong><small>Entradas menos saídas registradas</small></article>
+          <article class="metric"><span>Entradas do mês</span><strong id="metric-income">R$ 0,00</strong><small class="positive">Renda fixa e variável</small></article>
+          <article class="metric"><span>Saídas do mês</span><strong id="metric-expense">R$ 0,00</strong><small>Gastos e pagamentos registrados</small></article>
+          <article class="metric accent"><span>Dívidas em aberto</span><strong id="metric-debts">R$ 0,00</strong><small>Saldo de dívidas cadastradas</small></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel"><div class="panel-head"><div><h3>Fluxo do mês</h3><p class="muted">Entradas e saídas por dia</p></div></div><div class="chart-box"><canvas id="flow-chart"></canvas></div></article>
+          <article class="panel"><div class="panel-head"><div><h3>Orçamento por setor</h3><p class="muted">Gastos registrados no mês</p></div></div><div class="chart-box"><canvas id="category-chart"></canvas></div><p id="category-empty" class="muted empty-hint">Registrem despesas para ver as categorias.</p></article>
+        </div>
+        <div class="content-grid lower-grid">
+          <article class="panel"><div class="panel-head"><div><h3>Próximos vencimentos</h3><p class="muted">Contas cadastradas</p></div><button class="text-btn" data-page="bills">Ver todas →</button></div><div id="upcoming-list" class="list-stack"></div></article>
+          <article class="panel"><div class="panel-head"><div><h3>Metas de vocês</h3><p class="muted">Pequenos passos, grandes planos</p></div><button class="text-btn" data-page="goals">Ver metas →</button></div><div id="dashboard-goals" class="list-stack"></div></article>
+        </div>
+      </section>
+
+      <section id="transactions-page" class="page hidden">
+        <div class="page-intro"><div><h3>Entradas e saídas</h3><p class="muted">Registrem salários, renda extra, compras e pagamentos.</p></div><button class="btn primary" data-open-form="transaction">＋ Adicionar</button></div>
+        <div class="toolbar"><input id="transaction-search" placeholder="Buscar lançamento..."><select id="transaction-type-filter"><option value="all">Todos os tipos</option><option value="income">Entradas</option><option value="expense">Saídas</option></select><select id="transaction-category-filter"><option value="all">Todas as categorias</option></select></div>
+        <div id="transactions-list" class="record-list"></div>
+      </section>
+
+      <section id="bills-page" class="page hidden">
+        <div class="page-intro"><div><h3>Contas a pagar</h3><p class="muted">Acompanhem vencimentos e marquem contas pagas.</p></div><button class="btn primary" data-open-form="bill">＋ Nova conta</button></div>
+        <div id="bills-list" class="record-list"></div>
+      </section>
+
+      <section id="debts-page" class="page hidden">
+        <div class="page-intro"><div><h3>Central de dívidas</h3><p class="muted">Saldo restante, parcelas e prioridade de quitação.</p></div><button class="btn primary" data-open-form="debt">＋ Nova dívida</button></div>
+        <div id="debts-list" class="record-list"></div>
+      </section>
+
+      <section id="cards-page" class="page hidden">
+        <div class="page-intro"><div><h3>Cartões e compras parceladas</h3><p class="muted">Cadastrem cartões e planejem parcelas futuras.</p></div><div class="button-row"><button class="btn secondary" data-open-form="card">＋ Cartão</button><button class="btn primary" data-open-form="installment">＋ Compra parcelada</button></div></div>
+        <div id="cards-list" class="record-list"></div><h3 class="section-heading">Compras parceladas</h3><div id="installments-list" class="record-list"></div>
+      </section>
+
+      <section id="budgets-page" class="page hidden">
+        <div class="page-intro"><div><h3>Orçamento por setor</h3><p class="muted">Definam limites mensais para cada categoria.</p></div><button class="btn primary" data-open-form="budget">＋ Definir limite</button></div>
+        <div id="budgets-list" class="budget-grid"></div>
+      </section>
+
+      <section id="goals-page" class="page hidden">
+        <div class="page-intro"><div><h3>Metas e dinheiro guardado</h3><p class="muted">Reserva de emergência, viagens e sonhos compartilhados.</p></div><button class="btn primary" data-open-form="goal">＋ Nova meta</button></div>
+        <div id="goals-list" class="goal-grid"></div>
+      </section>
+
+      <section id="assets-page" class="page hidden">
+        <div class="page-intro"><div><h3>Patrimônio e investimentos</h3><p class="muted">Registrem saldos e bens para acompanhar a evolução patrimonial.</p></div><button class="btn primary" data-open-form="asset">＋ Adicionar item</button></div>
+        <div class="summary-grid compact"><article class="metric"><span>Ativos registrados</span><strong id="assets-total">R$ 0,00</strong></article><article class="metric"><span>Dívidas registradas</span><strong id="assets-debts">R$ 0,00</strong></article><article class="metric accent"><span>Patrimônio líquido estimado</span><strong id="net-worth">R$ 0,00</strong></article></div>
+        <div id="assets-list" class="record-list"></div>
+      </section>
+
+      <section id="reports-page" class="page hidden">
+        <div class="page-intro"><div><h3>Relatórios</h3><p class="muted">Entendam para onde o dinheiro está indo.</p></div><button id="export-btn" class="btn secondary">↓ Exportar CSV</button></div>
+        <div class="summary-grid"><article class="metric"><span>Entradas no período</span><strong id="report-income">R$ 0,00</strong></article><article class="metric"><span>Saídas no período</span><strong id="report-expense">R$ 0,00</strong></article><article class="metric"><span>Resultado do período</span><strong id="report-net">R$ 0,00</strong></article></div>
+        <article class="panel"><div class="panel-head"><div><h3>Gastos por categoria</h3><p class="muted">Use o mês selecionado na Visão geral.</p></div></div><div class="chart-box tall"><canvas id="report-chart"></canvas></div></article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="record-dialog" class="modal">
+    <form id="record-form" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">FINANCINHO</p><h2 id="modal-title">Novo registro</h2></div><button type="button" id="close-modal" class="icon-btn" aria-label="Fechar">×</button></div>
+      <div id="form-fields" class="form-grid"></div>
+      <p id="form-message" class="notice"></p>
+      <div class="modal-actions"><button type="button" id="cancel-modal" class="btn secondary">Cancelar</button><button type="submit" class="btn primary">Salvar registro</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
